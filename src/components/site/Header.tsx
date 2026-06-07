@@ -1,8 +1,20 @@
-import { Link } from "@tanstack/react-router";
-import { GraduationCap, Search, ShieldCheck, Plus } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { GraduationCap, ShieldCheck, Plus, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export function Header() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    toast.success("Signed out");
+    navigate({ to: "/" });
+  }
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container-page flex h-16 items-center justify-between gap-4">
@@ -26,12 +38,25 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-            <Link to="/auth">Sign in</Link>
-          </Button>
-          <Button asChild size="sm" className="gap-1.5">
-            <Link to="/auth"><Plus className="h-4 w-4" /> Post a listing</Link>
-          </Button>
+          {user ? (
+            <>
+              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+                <Link to="/dashboard">Dashboard</Link>
+              </Button>
+              <Button onClick={signOut} variant="ghost" size="sm" className="gap-1.5">
+                <LogOut className="h-4 w-4" /> Sign out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+                <Link to="/auth">Sign in</Link>
+              </Button>
+              <Button asChild size="sm" className="gap-1.5">
+                <Link to="/auth"><Plus className="h-4 w-4" /> Post a listing</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
